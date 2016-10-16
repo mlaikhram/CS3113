@@ -17,7 +17,7 @@
 
 SDL_Window* displayWindow;
 
-class Entity { 
+class Entity {
 public:
 	void Draw();
 	float x;
@@ -32,7 +32,7 @@ public:
 };
 
 
-GLuint LoadTexture(const char *image_path) 
+GLuint LoadTexture(const char *image_path)
 {
 	SDL_Surface *surface = IMG_Load(image_path);
 	GLuint textureID;
@@ -62,9 +62,9 @@ int main(int argc, char *argv[])
 
 	glViewport(0, 0, 640, 360);
 	ShaderProgram program(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
-	
+
 	float lastFrameTicks = 0.0f;
-	
+
 	GLuint p1Texture = LoadTexture("gray.png");
 	GLuint p2Texture = LoadTexture("gray.png");
 	GLuint ballTexture = LoadTexture("espurr.png");
@@ -96,32 +96,39 @@ int main(int argc, char *argv[])
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 				done = true;
-			} else if (event.type == SDL_KEYDOWN) {				
+			}
+			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
 					keyState = 1.5;
-				} else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
+				}
+				else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
 					keyState = -1.5;
 				}
-			} else {
+			}
+			else {
 				keyState = 0;
 			}
 			if (event.type == SDL_MOUSEBUTTONDOWN) {
 				if (event.button.button == 1) {
 					mouseState = 1.5;
-				} else if (event.button.button == 3) {
+				}
+				else if (event.button.button == 3) {
 					mouseState = -1.5;
 				}
-			} else if (event.type == SDL_MOUSEBUTTONUP) {
-				mouseState = 0;				
+			}
+			else if (event.type == SDL_MOUSEBUTTONUP) {
+				mouseState = 0;
 			}
 		}
 
 		//check bounds for p1
 		if (0.4 + p1y + elapsed * keyState > 2.0) {
 			p1y = 1.6;
-		} else if (-0.4 + p1y + elapsed * keyState < -2.0) {
+		}
+		else if (-0.4 + p1y + elapsed * keyState < -2.0) {
 			p1y = -1.6;
-		} else {
+		}
+		else {
 			p1y += elapsed * keyState;
 		}
 
@@ -139,8 +146,9 @@ int main(int argc, char *argv[])
 		//update ball position
 		if ((0.05 + bally) > 2.0 || (-0.05 + bally) < -2.0) {
 			angle *= -1;
-		} else if (!((-0.4 + p1y) > (0.05 + bally) || (0.4 + p1y) < (-0.05 + bally) || -3.45 < (-0.05 + ballx)) ||
-			!((-0.4 + p2y) > (0.05 + bally) || (0.4 + p2y) < (-0.05 + bally) || 3.45 > (0.05 + ballx))){
+		}
+		else if (!((-0.4 + p1y) > (0.05 + bally) || (0.4 + p1y) < (-0.05 + bally) || -3.45 < (-0.05 + ballx)) ||
+			!((-0.4 + p2y) > (0.05 + bally) || (0.4 + p2y) < (-0.05 + bally) || 3.45 > (0.05 + ballx))) {
 			angle = (180 - angle) % 360;
 		}
 
@@ -152,7 +160,8 @@ int main(int argc, char *argv[])
 			winnerx = 2;
 			ballx = 0;
 			bally = 0;
-		} else if (3.55 < ballx) {
+		}
+		else if (3.55 < ballx) {
 			winnerx = -2;
 			ballx = 0;
 			bally = 0;
@@ -160,13 +169,16 @@ int main(int argc, char *argv[])
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		//p1
+		modelMatrix.identity();
+		modelMatrix.Translate(-3.5, p1y, 0);
 		program.setModelMatrix(modelMatrix);
 		program.setProjectionMatrix(projectionMatrix);
-		program.setViewMatrix(viewMatrix);		
-		
-		//p1
+		program.setViewMatrix(viewMatrix);
+
 		glBindTexture(GL_TEXTURE_2D, p1Texture);
-		float vertices[] = { -3.55, -0.4 + p1y, -3.45, -0.4 + p1y, -3.45, 0.4 + p1y, -3.55, -0.4 + p1y, -3.45, 0.4 + p1y, -3.55, 0.4 + p1y };
+		//float vertices[] = { -3.55, -0.4 + p1y, -3.45, -0.4 + p1y, -3.45, 0.4 + p1y, -3.55, -0.4 + p1y, -3.45, 0.4 + p1y, -3.55, 0.4 + p1y };
+		float vertices[] = { -0.05, -0.4, 0.05, -0.4, 0.05, 0.4, -0.05, -0.4, 0.05, 0.4, -0.05, 0.4 };
 		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
 		glEnableVertexAttribArray(program.positionAttribute);
 		float texCoords[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
@@ -177,9 +189,16 @@ int main(int argc, char *argv[])
 		glDisableVertexAttribArray(program.texCoordAttribute);
 
 		//p2
+		modelMatrix.identity();
+		modelMatrix.Translate(3.5, p2y, 0);
+		program.setModelMatrix(modelMatrix);
+		program.setProjectionMatrix(projectionMatrix);
+		program.setViewMatrix(viewMatrix);
+
 		glBindTexture(GL_TEXTURE_2D, p2Texture);
-		float vertices2[] = { 3.45, -0.4 + p2y, 3.55, -0.4 + p2y, 3.55, 0.4 + p2y, 3.45, -0.4 + p2y, 3.55, 0.4 + p2y, 3.45, 0.4 + p2y };
-		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices2);
+		//float vertices2[] = { 3.45, -0.4 + p2y, 3.55, -0.4 + p2y, 3.55, 0.4 + p2y, 3.45, -0.4 + p2y, 3.55, 0.4 + p2y, 3.45, 0.4 + p2y };
+		//float vertices2[] = { -0.05, -0.4, 0.05, -0.4, 0.05, 0.4, -0.05, -0.4, 0.05, 0.4, -0.05, 0.4 };
+		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
 		glEnableVertexAttribArray(program.positionAttribute);
 		float texCoords2[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
 		glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords2);
@@ -187,11 +206,17 @@ int main(int argc, char *argv[])
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDisableVertexAttribArray(program.positionAttribute);
 		glDisableVertexAttribArray(program.texCoordAttribute);
-		
 
 		//crown
+		modelMatrix.identity();
+		modelMatrix.Translate(winnerx, 0, 0);
+		program.setModelMatrix(modelMatrix);
+		program.setProjectionMatrix(projectionMatrix);
+		program.setViewMatrix(viewMatrix);
+
 		glBindTexture(GL_TEXTURE_2D, crownTexture);
-		float vertices4[] = { -0.3 + winnerx, -0.3, 0.3 + winnerx, -0.3, 0.3 + winnerx, 0.3, -0.3 + winnerx, -0.3, 0.3 + winnerx, 0.3, -0.3 + winnerx, 0.3 };
+		//float vertices4[] = { -0.3 + winnerx, -0.3, 0.3 + winnerx, -0.3, 0.3 + winnerx, 0.3, -0.3 + winnerx, -0.3, 0.3 + winnerx, 0.3, -0.3 + winnerx, 0.3 };
+		float vertices4[] = { -0.3, -0.3, 0.3, -0.3, 0.3, 0.3, -0.3, -0.3, 0.3, 0.3, -0.3, 0.3 };
 		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices4);
 		glEnableVertexAttribArray(program.positionAttribute);
 		float texCoords4[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
@@ -204,8 +229,15 @@ int main(int argc, char *argv[])
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		//ball
+		modelMatrix.identity();
+		modelMatrix.Translate(ballx, bally, 0);
+		program.setModelMatrix(modelMatrix);
+		program.setProjectionMatrix(projectionMatrix);
+		program.setViewMatrix(viewMatrix);
+
 		glBindTexture(GL_TEXTURE_2D, ballTexture);
-		float vertices3[] = { -0.05 + ballx, -0.05 + bally, 0.05 + ballx, -0.05 + bally, 0.05 + ballx, 0.05 + bally, -0.05 + ballx, -0.05 + bally, 0.05 + ballx, 0.05 + bally, -0.05 + ballx, 0.05 + bally };
+		//float vertices3[] = { -0.05 + ballx, -0.05 + bally, 0.05 + ballx, -0.05 + bally, 0.05 + ballx, 0.05 + bally, -0.05 + ballx, -0.05 + bally, 0.05 + ballx, 0.05 + bally, -0.05 + ballx, 0.05 + bally };
+		float vertices3[] = { -0.05, -0.05, 0.05, -0.05, 0.05, 0.05, -0.05, -0.05, 0.05, 0.05, -0.05, 0.05 };
 		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices3);
 		glEnableVertexAttribArray(program.positionAttribute);
 		float texCoords3[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };

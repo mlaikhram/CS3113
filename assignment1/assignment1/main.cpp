@@ -81,7 +81,8 @@ int main(int argc, char *argv[])
 
 
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
-		float elapsed = ticks - lastFrameTicks; lastFrameTicks = ticks;
+		float elapsed = ticks - lastFrameTicks; 
+		lastFrameTicks = ticks;
 		angle += elapsed;
 
 		glBindTexture(GL_TEXTURE_2D, luxrayTexture);
