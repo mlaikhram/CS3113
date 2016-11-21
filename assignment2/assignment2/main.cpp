@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include "Matrix.h"
 #include "ShaderProgram.h"
 
@@ -45,10 +46,6 @@ GLuint LoadTexture(const char *image_path)
 	return textureID;
 }
 
-void setup()
-{
-
-}
 
 int main(int argc, char *argv[])
 {
@@ -56,6 +53,11 @@ int main(int argc, char *argv[])
 	displayWindow = SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);		//sound initialization
+	Mix_Chunk *airhorn;
+	airhorn = Mix_LoadWAV("Airhorn.wav");
+	Mix_Chunk *sniped;
+	sniped = Mix_LoadWAV("Sniped.wav");
 #ifdef _WINDOWS
 	glewInit();
 #endif
@@ -149,6 +151,7 @@ int main(int argc, char *argv[])
 		}
 		else if (!((-0.4 + p1y) > (0.05 + bally) || (0.4 + p1y) < (-0.05 + bally) || -3.45 < (-0.05 + ballx)) ||
 			!((-0.4 + p2y) > (0.05 + bally) || (0.4 + p2y) < (-0.05 + bally) || 3.45 > (0.05 + ballx))) {
+			Mix_PlayChannel(-1, sniped, 0);		//SNIPED
 			angle = (180 - angle) % 360;
 		}
 
@@ -160,11 +163,13 @@ int main(int argc, char *argv[])
 			winnerx = 2;
 			ballx = 0;
 			bally = 0;
+			Mix_PlayChannel(-1, airhorn, 0);		//airhorn
 		}
 		else if (3.55 < ballx) {
 			winnerx = -2;
 			ballx = 0;
 			bally = 0;
+			Mix_PlayChannel(-1, airhorn, 0);		//airhorn
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -253,6 +258,7 @@ int main(int argc, char *argv[])
 		SDL_GL_SwapWindow(displayWindow);
 	}
 
+	Mix_FreeChunk(airhorn);
 	SDL_Quit();
 	return 0;
 }
